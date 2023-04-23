@@ -1,3 +1,5 @@
+import csv
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -14,16 +16,21 @@ try:
 
     games = driver.find_elements(By.CSS_SELECTOR, "div.media")
 
-    for game in games:
-        title = game.find_element(By.CLASS_NAME, "media-title").text
-        # platform = game.find_element(By.CSS_SELECTOR, "span.data").text
-        date = game.find_element(
-            By.XPATH,
-            "/html/body/div[1]/div[2]/div[1]/div[2]/div/div/div/section/section/section/div[1]/a/div[2]/div/time/span",
-        ).text
-        rating = game.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[1]/div[2]/div/div/div/section/section/section/div[1]/a/div[1]/div[1]/span[1]/strong").text
-        # description = game.find_element(By.CSS_SELECTOR, "a.title").text
-        print(f"Title: {title}, Date of release: {date}, Rating: {rating}")
+    with open('gamespot.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Title', 'Date of release', 'Rating'])
+
+        for game in games:
+            title = game.find_element(By.CLASS_NAME, "media-title").text
+            # platform = game.find_element(By.CSS_SELECTOR, "span.data").text
+            date = game.find_element(
+                By.XPATH,
+                "/html/body/div[1]/div[2]/div[1]/div[2]/div/div/div/section/section/section/div[1]/a/div[2]/div/time/span",
+            ).text
+            rating = game.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[1]/div[2]/div/div/div/section/section/section/div[1]/a/div[1]/div[1]/span[1]/strong").text
+
+            writer.writerow([title, date, rating])
+
 except Exception as ex:
     print(ex)
 
