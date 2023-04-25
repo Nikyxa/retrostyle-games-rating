@@ -18,9 +18,18 @@ try:
     games = driver.find_elements(By.CLASS_NAME, "clamp-summary-wrap")
     game_urls = []
 
-    with open('metacritic.csv', mode='w', encoding='utf-8', newline='') as file:
+    with open("metacritic.csv", mode="w", encoding="utf-8", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(['Title', 'Platform', 'Date of release', "Genre", 'Rating', "Amount of ratings"])
+        writer.writerow(
+            [
+                "Title",
+                "Platform",
+                "Date of release",
+                "Genre",
+                "Rating",
+                "Amount of ratings",
+            ]
+        )
 
         for game in games:
             game_title = game.find_element(By.CSS_SELECTOR, "a.title")
@@ -30,21 +39,37 @@ try:
 
         for url in game_urls:
             driver.get(url[1])
-            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.hover_none")))
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.hover_none"))
+            )
 
             title = driver.find_element(By.CSS_SELECTOR, "a.hover_none").text
             platform = driver.find_element(By.CSS_SELECTOR, "span.platform").text
-            rating = driver.find_element(By.CSS_SELECTOR, "span[itemprop='ratingValue']").text
 
-            date_element = driver.find_element(By.XPATH,
-                                       "/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[1]/div[3]/ul/li[2]/span[2]").text
-            date_obj = datetime.strptime(date_element, "%b %Y")
+            rating_element = driver.find_element(
+                By.CSS_SELECTOR, "span[itemprop='ratingValue']"
+            ).text
+            rating = float(rating_element.strip("%")) / 100
+
+            date_element = driver.find_element(
+                By.XPATH,
+                "/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[1]/div[3]/ul/li[2]/span[2]",
+            ).text
+            date_obj = datetime.strptime(date_element, "%b %d, %Y")
             date = date_obj.strftime("%m/%Y")
 
             try:
-                amount_ratings = driver.find_element(By.XPATH,"/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[3]/div/div/div[2]/div[1]/div[2]/div[1]/div/div[2]/p/span[2]/a").text
-                genre = driver.find_element(By.XPATH,
-                                            '/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[3]/div/div/div[2]/div[2]/div[2]/ul/li[2]/span[4]').text
+                amount_element = driver.find_element(
+                    By.XPATH,
+                    "/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[3]/div/div/div[2]/div[1]/div[2]/div[1]/div/div[2]/p/span[2]/a",
+                ).text.split()
+                amount = amount_element[0]
+                amount_ratings = int(amount.replace(",", ""))
+
+                genre = driver.find_element(
+                    By.XPATH,
+                    "/html/body/div[1]/div[2]/div[1]/div[1]/div/div/div/div/div/div/div/div/div[1]/div[1]/div[3]/div/div/div[2]/div[2]/div[2]/ul/li[2]/span[2]",
+                ).text
             except Exception as ex:
                 amount_ratings = ""
                 genre = ""
